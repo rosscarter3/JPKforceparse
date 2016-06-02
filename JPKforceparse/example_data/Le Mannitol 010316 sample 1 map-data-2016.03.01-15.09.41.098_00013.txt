@@ -1,0 +1,229 @@
+# TEXT EXPORT
+# data-description.comment: no comment entry
+# data-description.name: no name entry
+# data-description.probe: no probe entry
+# data-description.user-name: temp
+# data-description.instrument: JPK00806-CellHesion
+# data-description.source-software: 5.0.73
+# data-description.modification-software: spm-5.0.73
+# index: 13
+# xPosition: -3.945312456853149E-5
+# yPosition: -4.960938161242392E-5
+# approachID: 2016.03.01-08.30.58-00258
+# force-settings.type: relative-force-settings
+# force-settings.extend-k-length: 500
+# force-settings.retract-k-length: 500
+# force-settings.extended-pause-k-length: 5
+# force-settings.retracted-pause-k-length: 0
+# force-settings.z-start-pause-option.type: constant-height
+# force-settings.z-end-pause-option.type: feedback-on
+# force-settings.extend-scan-time: 0.1
+# force-settings.retract-scan-time: 0.1
+# force-settings.retracted-pause-time: 0.0
+# force-settings.extended-pause-time: 0.0010
+# force-settings.data-description.comment: 
+# force-settings.data-description.name: 
+# force-settings.data-description.probe: 
+# force-settings.data-description.user-name: 
+# force-settings.data-description.instrument: 
+# force-settings.data-description.source-software: 
+# force-settings.data-description.modification-software: 
+# force-settings.start-with-retract: false
+# force-settings.control-settings-type: segment-control-settings
+# force-settings.closed-loop: false
+# force-settings.start-option.type: continue
+# force-settings.ttl-outputs.pins.list: 
+# force-settings.pause-before-first.type: constant-height-pause
+# force-settings.pause-before-first.identifier.type: standard
+# force-settings.pause-before-first.identifier.name: pause-spm
+# force-settings.pause-before-first.style: pause
+# force-settings.pause-before-first.duration: 0.0
+# force-settings.pause-before-first.num-points: 0
+# force-settings.pause-before-first.pause-option.type: constant-height
+# force-settings.pause-before-first.height-limit: NaN
+# force-settings.force-baseline-adjust-settings.enabled: true
+# force-settings.force-baseline-adjust-settings.interval: 1
+# force-settings.force-baseline-adjust-settings.beginOfLine: true
+# force-settings.force-baseline-adjust-settings.deadtimeBeforeSamples: 100
+# force-settings.force-baseline-adjust-settings.averageSamples: 100
+# force-settings.line-clock.active.extend: false
+# force-settings.line-clock.active.retract: false
+# force-settings.relative-setpoint: 1.0161491297211103
+# force-settings.relative-z-start: 9.999999999999999E-6
+# force-settings.relative-z-end: 0.0
+# feedbackMode: contact
+# pauseBeforeFirst: 0.0
+# traceScanTime: 0.1
+# retraceScanTime: 0.1
+# pauseAtStart: 0.0
+# pauseAtEnd: 0.0010
+# pauseOnTipsaver: 0
+# scanner: false
+# date: Tue Mar 01 15:09:43 GMT 2016
+#
+# segmentIndex: 0
+# segment: extend
+# columns: tipSampleSeparation vDeflection height error smoothedMeasuredHeight measuredHeight hDeflection seriesTime time
+# fancyNames: "Tip-Sample Separation" "Vertical Deflection" "Height" "Error Signal" "Height (measured & smoothed)" "Height (measured)" "Lateral Deflection" "Series Time" "Segment Time"
+# heightMultiplier: 0.672126
+# heightOffset: 0.0
+# sensitivity: 3.872E-8
+# springConstant: 63.54
+# calibrationSlots: nominal force nominal volts nominal nominal volts elapsed elapsed
+# units: m N m V m m V s s
+#
+6.873923E-6 1.657193E-9 6.1514205E-5 0.0 6.8738973E-6 6.7903648E-6 -0.08316874 1.0E-4 1.0E-4
+6.861914E-6 7.848046E-10 6.1494204E-5 0.0 6.8619015E-6 6.789644E-6 -0.08243726 3.0E-4 3.0E-4
+6.849858E-6 7.7630347E-10 6.14742E-5 0.0 6.8498457E-6 6.7900287E-6 -0.082319595 5.0E-4 5.0E-4
+6.8377517E-6 1.4756005E-9 6.14542E-5 0.0 6.8377285E-6 6.786946E-6 -0.08285363 7.0E-4 7.0E-4
+
+# index: 13
+# xPosition: -3.945312456853149E-5
+# yPosition: -4.960938161242392E-5
+# approachID: 2016.03.01-08.30.58-00258
+# force-settings.type: relative-force-settings
+# force-settings.extend-k-length: 500
+# force-settings.retract-k-length: 500
+# force-settings.extended-pause-k-length: 5
+# force-settings.retracted-pause-k-length: 0
+# force-settings.z-start-pause-option.type: constant-height
+# force-settings.z-end-pause-option.type: feedback-on
+# force-settings.extend-scan-time: 0.1
+# force-settings.retract-scan-time: 0.1
+# force-settings.retracted-pause-time: 0.0
+# force-settings.extended-pause-time: 0.0010
+# force-settings.data-description.comment: 
+# force-settings.data-description.name: 
+# force-settings.data-description.probe: 
+# force-settings.data-description.user-name: 
+# force-settings.data-description.instrument: 
+# force-settings.data-description.source-software: 
+# force-settings.data-description.modification-software: 
+# force-settings.start-with-retract: false
+# force-settings.control-settings-type: segment-control-settings
+# force-settings.closed-loop: false
+# force-settings.start-option.type: continue
+# force-settings.ttl-outputs.pins.list: 
+# force-settings.pause-before-first.type: constant-height-pause
+# force-settings.pause-before-first.identifier.type: standard
+# force-settings.pause-before-first.identifier.name: pause-spm
+# force-settings.pause-before-first.style: pause
+# force-settings.pause-before-first.duration: 0.0
+# force-settings.pause-before-first.num-points: 0
+# force-settings.pause-before-first.pause-option.type: constant-height
+# force-settings.pause-before-first.height-limit: NaN
+# force-settings.force-baseline-adjust-settings.enabled: true
+# force-settings.force-baseline-adjust-settings.interval: 1
+# force-settings.force-baseline-adjust-settings.beginOfLine: true
+# force-settings.force-baseline-adjust-settings.deadtimeBeforeSamples: 100
+# force-settings.force-baseline-adjust-settings.averageSamples: 100
+# force-settings.line-clock.active.extend: false
+# force-settings.line-clock.active.retract: false
+# force-settings.relative-setpoint: 1.0161491297211103
+# force-settings.relative-z-start: 9.999999999999999E-6
+# force-settings.relative-z-end: 0.0
+# feedbackMode: contact
+# pauseBeforeFirst: 0.0
+# traceScanTime: 0.1
+# retraceScanTime: 0.1
+# pauseAtStart: 0.0
+# pauseAtEnd: 0.0010
+# pauseOnTipsaver: 0
+# scanner: false
+# date: Tue Mar 01 15:09:43 GMT 2016
+#
+# segmentIndex: 1
+# segment: pause
+# columns: tipSampleSeparation vDeflection height error smoothedMeasuredHeight measuredHeight hDeflection seriesTime time
+# fancyNames: "Tip-Sample Separation" "Vertical Deflection" "Height" "Error Signal" "Height (measured & smoothed)" "Height (measured)" "Lateral Deflection" "Series Time" "Segment Time"
+# heightMultiplier: 0.672126
+# heightOffset: 0.0
+# sensitivity: 3.872E-8
+# springConstant: 63.54
+# calibrationSlots: nominal force nominal volts nominal nominal volts elapsed elapsed
+# units: m N m V m m V s s
+#
+-1.2811175E-6 2.5925538E-6 5.1604293E-5 -0.014802307 -1.3219192E-6 -1.3219195E-6 -0.13853344 0.0993 1.0E-4
+-1.2998729E-6 2.642248E-6 5.1604362E-5 -0.035020377 -1.3414572E-6 -1.3414568E-6 -0.13908276 0.0995 3.0E-4
+-1.3169038E-6 2.6965147E-6 5.160449E-5 -0.057095252 -1.3593425E-6 -1.3593418E-6 -0.1403347 0.0997 5.0E-4
+-1.332527E-6 2.7503763E-6 5.160467E-5 -0.07900416 -1.3758117E-6 -1.3758126E-6 -0.14190456 0.0999 7.0E-4
+-1.349423E-6 2.8101156E-6 5.160491E-5 -0.103303455 -1.3936493E-6 -1.3936489E-6 -0.14277351 0.1001 9.0E-4
+
+# index: 13
+# xPosition: -3.945312456853149E-5
+# yPosition: -4.960938161242392E-5
+# approachID: 2016.03.01-08.30.58-00258
+# force-settings.type: relative-force-settings
+# force-settings.extend-k-length: 500
+# force-settings.retract-k-length: 500
+# force-settings.extended-pause-k-length: 5
+# force-settings.retracted-pause-k-length: 0
+# force-settings.z-start-pause-option.type: constant-height
+# force-settings.z-end-pause-option.type: feedback-on
+# force-settings.extend-scan-time: 0.1
+# force-settings.retract-scan-time: 0.1
+# force-settings.retracted-pause-time: 0.0
+# force-settings.extended-pause-time: 0.0010
+# force-settings.data-description.comment: 
+# force-settings.data-description.name: 
+# force-settings.data-description.probe: 
+# force-settings.data-description.user-name: 
+# force-settings.data-description.instrument: 
+# force-settings.data-description.source-software: 
+# force-settings.data-description.modification-software: 
+# force-settings.start-with-retract: false
+# force-settings.control-settings-type: segment-control-settings
+# force-settings.closed-loop: false
+# force-settings.start-option.type: continue
+# force-settings.ttl-outputs.pins.list: 
+# force-settings.pause-before-first.type: constant-height-pause
+# force-settings.pause-before-first.identifier.type: standard
+# force-settings.pause-before-first.identifier.name: pause-spm
+# force-settings.pause-before-first.style: pause
+# force-settings.pause-before-first.duration: 0.0
+# force-settings.pause-before-first.num-points: 0
+# force-settings.pause-before-first.pause-option.type: constant-height
+# force-settings.pause-before-first.height-limit: NaN
+# force-settings.force-baseline-adjust-settings.enabled: true
+# force-settings.force-baseline-adjust-settings.interval: 1
+# force-settings.force-baseline-adjust-settings.beginOfLine: true
+# force-settings.force-baseline-adjust-settings.deadtimeBeforeSamples: 100
+# force-settings.force-baseline-adjust-settings.averageSamples: 100
+# force-settings.line-clock.active.extend: false
+# force-settings.line-clock.active.retract: false
+# force-settings.relative-setpoint: 1.0161491297211103
+# force-settings.relative-z-start: 9.999999999999999E-6
+# force-settings.relative-z-end: 0.0
+# feedbackMode: contact
+# pauseBeforeFirst: 0.0
+# traceScanTime: 0.1
+# retraceScanTime: 0.1
+# pauseAtStart: 0.0
+# pauseAtEnd: 0.0010
+# pauseOnTipsaver: 0
+# scanner: false
+# date: Tue Mar 01 15:09:43 GMT 2016
+#
+# segmentIndex: 2
+# segment: retract
+# columns: tipSampleSeparation vDeflection height error smoothedMeasuredHeight measuredHeight hDeflection seriesTime time
+# fancyNames: "Tip-Sample Separation" "Vertical Deflection" "Height" "Error Signal" "Height (measured & smoothed)" "Height (measured)" "Lateral Deflection" "Series Time" "Segment Time"
+# heightMultiplier: 0.672126
+# heightOffset: 0.0
+# sensitivity: 3.872E-8
+# springConstant: 63.54
+# calibrationSlots: nominal force nominal volts nominal nominal volts elapsed elapsed
+# units: m N m V m m V s s
+#
+-1.5071885E-6 2.946339E-6 5.1614934E-5 0.0 -1.5535583E-6 -1.4224348E-6 -0.14466359 0.1003 1.0E-4
+-1.4960342E-6 3.0107456E-6 5.1634936E-5 0.0 -1.5434176E-6 -1.4372207E-6 -0.146363 0.1005 3.0E-4
+-1.4848971E-6 3.0687122E-6 5.1654933E-5 0.0 -1.5331929E-6 -1.4489832E-6 -0.14719348 0.1007 5.0E-4
+-1.4737997E-6 3.1188235E-6 5.1674935E-5 0.0 -1.5228841E-6 -1.4598844E-6 -0.14817047 0.1009 7.0E-4
+-1.4627926E-6 3.158129E-6 5.1694937E-5 0.0 -1.5124956E-6 -1.4654812E-6 -0.14827853 0.1011 9.0E-4
+-1.4518129E-6 3.190358E-6 5.1714935E-5 0.0 -1.5020231E-6 -1.4713327E-6 -0.14917916 0.1013 0.0011
+-1.4410131E-6 3.206098E-6 5.1734936E-5 0.0 -1.491471E-6 -1.4746647E-6 -0.15010184 0.1015 0.0013
+-1.4305325E-6 3.1964955E-6 5.1754934E-5 0.0 -1.4808394E-6 -1.4745997E-6 -0.14848615 0.1017 0.0015
+-1.4204148E-6 3.158929E-6 5.1774936E-5 0.0 -1.4701304E-6 -1.4740688E-6 -0.14613388 0.1019 0.0017
+-1.4107422E-6 3.0880183E-6 5.1794934E-5 0.0 -1.4593419E-6 -1.4709967E-6 -0.14446105 0.1021 0.0019
+-1.401452E-6 2.9879143E-6 5.1814935E-5 0.0 -1.4484762E-6 -1.4670308E-6 -0.14088796 0.1023 0.0021
+-1.3925104E-6 2.861024E-6 5.1834933E-5 0.0 -1.4375375E-6 -1.4612767E-6 -0.13670957 0.1025 0.0023

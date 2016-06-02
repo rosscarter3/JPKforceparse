@@ -1,4 +1,5 @@
 from setuptools import setup
+from JPKforceparse import __version__
 
 # Importing the "multiprocessing" module is required for the "nose.collector".
 # See also: http://bugs.python.org/issue15881#msg170215
@@ -21,7 +22,7 @@ class NoseTestCommand(TestCommand):
         import nose
         nose.run_exit(argv=['nosetests'])
 
-version = "0.0.1"
+version = __version__
 readme = open('README.rst').read()
 
 setup(name="JPKforceparse",
@@ -29,5 +30,7 @@ setup(name="JPKforceparse",
       long_description=readme,
       packages=["JPKforceparse"],
       cmdclass={"test": NoseTestCommand},
+      install_requires=['matplotlib',
+                        'numpy'],
       tests_require=["nose", "coverage"],
 )
