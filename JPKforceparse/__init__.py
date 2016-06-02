@@ -44,8 +44,13 @@ class ForceCurve(object):
         self.time = data[:, 8]
 
     def plot_curve(self):
-        plt.plot(self.height, self.vDeflection)
+        plt.plot(self.smoothedMeasHeight, self.vDeflection)
         plt.show()
+
+
+class ForceMap(object):
+    def __init__(self, directory):
+        pass
 
 
 def main():
