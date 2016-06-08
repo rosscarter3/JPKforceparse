@@ -1,6 +1,8 @@
 """JPK-force-parse package."""
+import os
 import numpy as np
 import matplotlib
+from collections import OrderedDict
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
