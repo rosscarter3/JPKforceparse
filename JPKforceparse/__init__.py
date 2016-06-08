@@ -10,6 +10,9 @@ __author__ = "Ross Carter"
 
 
 class ForceCurve(object):
+    """
+    A Force Curve
+    """
     def __init__(self, path):
         self.raw_path = path
 
@@ -49,11 +52,17 @@ class ForceCurve(object):
         self.contactpoint = self.height[contact_point_index]
 
     def plot_curve(self):
+        """
+        Plots a force curve of smoothed measured height vs. cantilever deflection
+        """
         plt.plot(self.smoothedMeasHeight, self.vDeflection)
         plt.show()
 
 
 class ForceMap(object):
+    """
+    A Force Map, a collection of force curves
+    """
     def __init__(self, directory):
         print "Loading Curves... "
         self.forcecurvedict = OrderedDict()
@@ -66,6 +75,10 @@ class ForceMap(object):
             self.forcecurvedict[key] = value
 
     def plot_height_map(self):
+        """
+        plots a force map of contact height
+        :return:
+        """
         print "Plotting Height Map..."
         x, y, z = list(), list(), list()
         for curve in self.forcecurvedict.itervalues():
