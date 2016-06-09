@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib
 from collections import OrderedDict
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -15,6 +16,7 @@ class ForceCurve(object):
     """
     A Force Curve
     """
+
     def __init__(self, path):
         self.raw_path = path
 
@@ -22,12 +24,14 @@ class ForceCurve(object):
 
         raw_stream = file(self.raw_path, 'r')
         for num, line in enumerate(raw_stream):
-            if line.startswith('# xPos'):
+            if line.startswith('# xPosition'):
                 self.x_pos = float(line.split(": ")[1])
-            elif line.startswith('# yPos'):
+            elif line.startswith('# yPosition'):
                 self.y_pos = float(line.split(": ")[1])
             elif line.startswith('# index'):
                 self.index = int(line.split(": ")[1])
+            elif line.startswith('# springConstant'):
+                self.spring_constant = float(line.split(": ")[1])
             elif line[0] != '#':
                 try:
                     data_row = line.split(" ")
@@ -38,26 +42,44 @@ class ForceCurve(object):
 
         data = np.delete(data, 0, axis=0)
 
-        self.tipSampleSep = data[:, 0]
-        self.vDeflection = data[:, 1]
-        self.height = data[:, 2]
-        self.error = data[:, 3]
-        self.smoothedMeasHeight = data[:, 4]
-        self.measHeight = data[:, 5]
-        self.hDeflection = data[:, 6]
-        self.seriesTime = data[:, 7]
-        self.time = data[:, 8]
+        self.tipSampleSep = data[:, 0]          # [metres]
+        self.vDeflection = data[:, 1]           # [Newtons]
+        self.height = data[:, 2]                # [metres]
+        self.error = data[:, 3]                 # [volts]
+        self.smoothedMeasHeight = data[:, 4]    # [metres]
+        self.measHeight = data[:, 5]            # [metres]
+        self.hDeflection = data[:, 6]           # [volts]
+        self.seriesTime = data[:, 7]            # [seconds]
+        self.time = data[:, 8]                  # [seconds]
 
-        # Contact point calculation
+        self.calculate_contact_point()
+        self.calculate_apparent_stiffness()
+
+    def calculate_contact_point(self):
+        """Contact point calculation"""
+        # finds the contact point
         min_tssep_value = min(i for i in self.tipSampleSep if i > 0)
-        contact_point_index = np.where(self.tipSampleSep == min_tssep_value)
-        self.contactpoint = self.height[contact_point_index]
+        self.contact_point_index = int(np.where(self.tipSampleSep == min_tssep_value)[0])
+        self.contactpoint = self.height[self.contact_point_index]
+
+    def calculate_apparent_stiffness(self, depth = 20e-9):
+        """Instantaneous apparent stiffness calculation"""
+        # fit polynomial, differentiate force indentation, report at fixed indentation depth
+        indentation = self.smoothedMeasHeight[-1:len(self.smoothedMeasHeight)-self.contact_point_index]
+        force = self.vDeflection[-1:len(self.smoothedMeasHeight)-self.contact_point_index]
+        plt.plot(indentation, force)
+        plt.show()
+
+    def calculate_apparent_young_modulus(self):
+        """Apparent Young's Modulus Calculation"""
+        # see hertz sneddon stuff
+        pass
 
     def plot_curve(self):
         """
         Plots a force curve of smoothed measured height vs. cantilever deflection
         """
-        plt.plot(self.smoothedMeasHeight, self.vDeflection)
+        plt.plot(self.vDeflection)
         plt.show()
 
 
@@ -65,6 +87,7 @@ class ForceMap(object):
     """
     A Force Map, a collection of force curves
     """
+
     def __init__(self, directory):
         print "Loading Curves... "
         self.forcecurvedict = OrderedDict()
@@ -90,7 +113,8 @@ class ForceMap(object):
 
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        ax.plot_trisurf(x, y, z, color=z, cmap='Set1', vmin=min(z), vmax=max(z))
+        ax.scatter(x,y,z)
+        #ax.plot_trisurf(x, y, z, color=z, cmap='Set1', vmin=min(z), vmax=max(z))
         # ax.plot_trisurf(x, y, z)
         plt.show()
 
@@ -100,9 +124,10 @@ def main():
     # path2 = "/Users/carterr/Documents/afm_andy/LE Mannitol 010316 Sample 1/Le Mannitol 010316 sample 1 map-data-2016.03.01-15.09.41.098_processed-2016.03.02-10.20.03/Le Mannitol 010316 sample 1 map-data-2016.03.01-15.09.41.098_00256.txt"
     # point1 = ForceCurve(path2)
     # point1.plot_curve()
-    dir = "/Users/carterr/Documents/afm_andy/LE Mannitol 010316 Sample 1/Le Mannitol 010316 sample 1 map-data-2016.03.01-15.09.41.098_processed-2016.03.02-10.20.03"
-    map1 = ForceMap(dir)
+    directory = "/Users/carterr/Documents/afm_andy/LE Mannitol 010316 Sample 1/Le Mannitol 010316 sample 1 map-data-2016.03.01-15.09.41.098_processed-2016.03.02-10.20.03"
+    map1 = ForceMap(directory)
     map1.plot_height_map()
+
 
 if __name__ == '__main__':
     main()
