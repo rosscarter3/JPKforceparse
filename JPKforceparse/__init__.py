@@ -2,11 +2,11 @@
 import os
 import numpy as np
 import matplotlib
+from fractions import Fraction
 from collections import OrderedDict
-
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 
 __version__ = "0.0.1"
 __author__ = "Ross Carter"
@@ -20,7 +20,7 @@ class ForceCurve(object):
     def __init__(self, path):
         self.raw_path = path
 
-        data = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0]])
+        data = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype='float64')
 
         raw_stream = file(self.raw_path, 'r')
         for num, line in enumerate(raw_stream):
@@ -32,6 +32,12 @@ class ForceCurve(object):
                 self.index = int(line.split(": ")[1])
             elif line.startswith('# springConstant'):
                 self.spring_constant = float(line.split(": ")[1])
+            # elif line.startswith('# segmentIndex: 0'):
+            #     seg0_start = num
+            # elif line.startswith('# segmentIndex: 1'):
+            #     seg1_start = num
+            # elif line.startswith('# segmentIndex: 2'):
+            #     seg2_start = num
             elif line[0] != '#':
                 try:
                     data_row = line.split(" ")
@@ -39,7 +45,9 @@ class ForceCurve(object):
                     data = np.append(data, np.array([map(float, data_row)]), axis=0)
                 except IndexError:
                     pass
+            num_lines = num
 
+        # print seg0_start, seg1_start, seg2_start, num_lines
         data = np.delete(data, 0, axis=0)
 
         self.tipSampleSep = data[:, 0]          # [metres]
@@ -54,25 +62,55 @@ class ForceCurve(object):
 
         self.calculate_contact_point()
         self.calculate_apparent_stiffness()
+        self.calculate_apparent_young_modulus_hertz()
 
     def calculate_contact_point(self):
-        """Contact point calculation"""
+        """
+        Contact point calculation
+        """
         # finds the contact point
         min_tssep_value = min(i for i in self.tipSampleSep if i > 0)
         self.contact_point_index = int(np.where(self.tipSampleSep == min_tssep_value)[0])
         self.contactpoint = self.height[self.contact_point_index]
 
-    def calculate_apparent_stiffness(self, depth = 20e-9):
-        """Instantaneous apparent stiffness calculation"""
+    def calculate_apparent_stiffness(self, depth=20e-9):
+        """
+        Instantaneous apparent stiffness calculation
+        """
         # fit polynomial, differentiate force indentation, report at fixed indentation depth
-        indentation = self.smoothedMeasHeight[-1:len(self.smoothedMeasHeight)-self.contact_point_index]
-        force = self.vDeflection[-1:len(self.smoothedMeasHeight)-self.contact_point_index]
-        plt.plot(indentation, force)
-        plt.show()
+        indentation = self.smoothedMeasHeight[0:499][len(self.smoothedMeasHeight) - self.contact_point_index:-1]
+        force = self.vDeflection[0:499][len(self.vDeflection) - self.contact_point_index:-1]
+        try:
+            z = np.polyfit(indentation, force, 3)
+            self.instantaneous_stiffness = 3*z[3]*depth**2 + 2*z[2]*depth + z[1]
+        except TypeError:
+            self.instantaneous_stiffness = 0
 
-    def calculate_apparent_young_modulus(self):
-        """Apparent Young's Modulus Calculation"""
+    def calculate_apparent_young_modulus_hertz(self, tip_radius=10e-9, poisson_ration=0.5):
+        """
+        Apparent Young's Modulus Calculation, Hertz Model, sphere
+        """
         # see hertz sneddon stuff
+        from scipy.optimize import curve_fit
+
+        def fit_func(x, a):
+            return a*x**Fraction('3/2')
+
+        indentation = abs(self.smoothedMeasHeight[0:499][len(self.smoothedMeasHeight) - self.contact_point_index:-1])
+        force = np.power(self.vDeflection[0:499][len(self.vDeflection) - self.contact_point_index:-1], 3)
+        try:
+            z = np.polyfit(indentation, force, 2)
+        except TypeError:
+            z = [0, 0]
+        self.young_mod_hertz = (3./4) * z[0] * (1-poisson_ration**2) * (1/np.sqrt(tip_radius))
+
+    def calculate_apparent_young_modulus_sneddon(self):
+        """
+        Apparent Young's Modulus Calculation, Sneddon Model, cone
+        """
+        # see hertz sneddon stuff
+        indentation = self.smoothedMeasHeight[0:499][self.contact_point_index:-1]
+        force = self.vDeflection[0:499][self.contact_point_index:-1]
         pass
 
     def plot_curve(self):
@@ -90,32 +128,83 @@ class ForceMap(object):
 
     def __init__(self, directory):
         print "Loading Curves... "
-        self.forcecurvedict = OrderedDict()
+        self.force_curve_dictionary = OrderedDict()
 
         for i, curve_file in enumerate(os.listdir(directory)):
             if i % 500 == 0:
                 print i, " curves loaded"
             key = curve_file[-9:-4]
             value = ForceCurve(os.path.join(directory, curve_file))
-            self.forcecurvedict[key] = value
+            self.force_curve_dictionary[key] = value
 
     def plot_height_map(self):
         """
         plots a force map of contact height
-        :return:
         """
         print "Plotting Height Map..."
-        x, y, z = list(), list(), list()
-        for curve in self.forcecurvedict.itervalues():
+        x, y, contact_point = list(), list(), list()
+        for curve in self.force_curve_dictionary.itervalues():
             x.append(curve.x_pos)
             y.append(curve.y_pos)
-            z.append(curve.contactpoint)
+            contact_point.append(curve.contactpoint)
 
         fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        ax.scatter(x,y,z)
-        #ax.plot_trisurf(x, y, z, color=z, cmap='Set1', vmin=min(z), vmax=max(z))
-        # ax.plot_trisurf(x, y, z)
+        ax = fig.gca()
+        ax.scatter(x, y,
+                   c=contact_point,
+                   cmap='bone',
+                   vmin=min(contact_point),
+                   vmax=max(contact_point))
+        plt.axis('equal')
+        plt.xlim([min(x), max(x)])
+        plt.ylim([min(y), max(y)])
+        plt.show()
+
+    def plot_stiffness_map(self):
+        """
+        plots a force map of instantaneous stiffness
+        """
+        print "Plotting Stiffness Map..."
+        x, y, apparent_stiffness = list(), list(), list()
+        for curve in self.force_curve_dictionary.itervalues():
+            x.append(curve.x_pos)
+            y.append(curve.y_pos)
+            apparent_stiffness.append(curve.instantaneous_stiffness)
+
+        fig = plt.figure()
+        ax = fig.gca()
+        ax.scatter(x, y,
+                   c=apparent_stiffness,
+                   cmap='bone',
+                   vmin=min(apparent_stiffness),
+                   vmax=max(apparent_stiffness))
+        plt.axis('equal')
+        plt.xlim([min(x), max(x)])
+        plt.ylim([min(y), max(y)])
+        plt.show()
+
+
+    def plot_hertz_map(self):
+        """
+        plots a force map of instantaneous stiffness
+        """
+        print "Plotting Hertz Modulus Map..."
+        x, y, hertz = list(), list(), list()
+        for curve in self.force_curve_dictionary.itervalues():
+            x.append(curve.x_pos)
+            y.append(curve.y_pos)
+            hertz.append(curve.young_mod_hertz)
+
+        fig = plt.figure()
+        ax = fig.gca()
+        ax.scatter(x, y,
+                   c=hertz,
+                   cmap='bone',
+                   vmin=min(hertz),
+                   vmax=max(hertz))
+        plt.axis('equal')
+        plt.xlim([min(x), max(x)])
+        plt.ylim([min(y), max(y)])
         plt.show()
 
 
