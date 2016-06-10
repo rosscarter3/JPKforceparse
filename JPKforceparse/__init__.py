@@ -2,7 +2,6 @@
 import os
 import numpy as np
 import matplotlib
-from fractions import Fraction
 from collections import OrderedDict
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -21,7 +20,6 @@ class ForceCurve(object):
         self.raw_path = path
 
         data = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype='float64')
-
         raw_stream = file(self.raw_path, 'r')
         for num, line in enumerate(raw_stream):
             if line.startswith('# xPosition'):
@@ -32,12 +30,14 @@ class ForceCurve(object):
                 self.index = int(line.split(": ")[1])
             elif line.startswith('# springConstant'):
                 self.spring_constant = float(line.split(": ")[1])
-            # elif line.startswith('# segmentIndex: 0'):
-            #     seg0_start = num
-            # elif line.startswith('# segmentIndex: 1'):
-            #     seg1_start = num
-            # elif line.startswith('# segmentIndex: 2'):
-            #     seg2_start = num
+            elif line.startswith('# force-settings.extend-k-length'):
+                self.extend_length = int(line.split(": ")[1])
+            elif line.startswith('# force-settings.retract-k-length'):
+                self.retract_length = int(line.split(": ")[1])
+            elif line.startswith('# force-settings.extended-pause-k-length'):
+                self.extend_pause_length = int(line.split(": ")[1])
+            elif line.startswith('# force-settings.retracted-pause-k-length'):
+                self.retract_pause_length = int(line.split(": ")[1])
             elif line[0] != '#':
                 try:
                     data_row = line.split(" ")
@@ -45,9 +45,7 @@ class ForceCurve(object):
                     data = np.append(data, np.array([map(float, data_row)]), axis=0)
                 except IndexError:
                     pass
-            num_lines = num
 
-        # print seg0_start, seg1_start, seg2_start, num_lines
         data = np.delete(data, 0, axis=0)
 
         self.tipSampleSep = data[:, 0]          # [metres]
@@ -78,8 +76,8 @@ class ForceCurve(object):
         Instantaneous apparent stiffness calculation
         """
         # fit polynomial, differentiate force indentation, report at fixed indentation depth
-        indentation = self.smoothedMeasHeight[0:499][len(self.smoothedMeasHeight) - self.contact_point_index:-1]
-        force = self.vDeflection[0:499][len(self.vDeflection) - self.contact_point_index:-1]
+        indentation = self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1]
+        force = self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1]
         try:
             z = np.polyfit(indentation, force, 3)
             self.instantaneous_stiffness = 3*z[3]*depth**2 + 2*z[2]*depth + z[1]
@@ -90,14 +88,8 @@ class ForceCurve(object):
         """
         Apparent Young's Modulus Calculation, Hertz Model, sphere
         """
-        # see hertz sneddon stuff
-        from scipy.optimize import curve_fit
-
-        def fit_func(x, a):
-            return a*x**Fraction('3/2')
-
-        indentation = abs(self.smoothedMeasHeight[0:499][len(self.smoothedMeasHeight) - self.contact_point_index:-1])
-        force = np.power(self.vDeflection[0:499][len(self.vDeflection) - self.contact_point_index:-1], 3)
+        indentation = abs(self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1])
+        force = np.power(self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1], 3)
         try:
             z = np.polyfit(indentation, force, 2)
         except TypeError:
@@ -109,8 +101,8 @@ class ForceCurve(object):
         Apparent Young's Modulus Calculation, Sneddon Model, cone
         """
         # see hertz sneddon stuff
-        indentation = self.smoothedMeasHeight[0:499][self.contact_point_index:-1]
-        force = self.vDeflection[0:499][self.contact_point_index:-1]
+        indentation = self.smoothedMeasHeight[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1]
+        force = self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1]
         pass
 
     def plot_curve(self):
@@ -119,6 +111,16 @@ class ForceCurve(object):
         """
         plt.plot(self.vDeflection)
         plt.show()
+
+    def __repr__(self):
+        return "I am a force curve at x = %f, y = %s \n \
+        My contact point is at %f metres \n \
+        My apparent stiffness is %f N/m \n \
+        My Hertz modulus is %f Pascals" % (self.x_pos,
+                                           self.y_pos,
+                                           self.contactpoint,
+                                           self.instantaneous_stiffness,
+                                           self.young_mod_hertz)
 
 
 class ForceMap(object):
@@ -182,7 +184,6 @@ class ForceMap(object):
         plt.xlim([min(x), max(x)])
         plt.ylim([min(y), max(y)])
         plt.show()
-
 
     def plot_hertz_map(self):
         """

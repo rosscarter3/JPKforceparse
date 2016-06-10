@@ -35,7 +35,6 @@ setup(name="JPKforceparse",
       packages=["JPKforceparse"],
       cmdclass={"test": NoseTestCommand},
       install_requires=['matplotlib',
-                        'numpy',
-                        'scipy'],
+                        'numpy'],
       tests_require=["nose", "coverage"],
 )
