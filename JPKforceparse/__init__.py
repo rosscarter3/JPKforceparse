@@ -10,6 +10,10 @@ import matplotlib.pyplot as plt
 __version__ = "0.0.1"
 __author__ = "Ross Carter"
 
+# TODO for getting line profiles use either of these??
+# TODO skimage.measure.profile_line(img, src, dst, linewidth=1, order=1, mode='constant', cval=0.0)
+# TODO zi = scipy.ndimage.map_coordinates(z, np.vstack((y,x)))
+
 
 class ForceCurve(object):
     """
@@ -61,6 +65,7 @@ class ForceCurve(object):
         self.calculate_contact_point()
         self.calculate_apparent_stiffness()
         self.calculate_apparent_young_modulus_hertz()
+        self.calculate_apparent_young_modulus_sneddon()
 
     def calculate_contact_point(self):
         """
@@ -80,47 +85,66 @@ class ForceCurve(object):
         force = self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1]
         try:
             z = np.polyfit(indentation, force, 3)
-            self.instantaneous_stiffness = 3*z[3]*depth**2 + 2*z[2]*depth + z[1]
+            self.instantaneous_stiffness = abs(3*z[0]*depth**2 + 2*z[1]*depth + z[2])
+            self.stiff_params = z
         except TypeError:
             self.instantaneous_stiffness = 0
+            self.stiff_params = [0, 0, 0, 0]
 
-    def calculate_apparent_young_modulus_hertz(self, tip_radius=10e-9, poisson_ration=0.5):
+    def calculate_apparent_young_modulus_hertz(self, tip_radius=10e-9, poisson_ratio=0.5):
         """
         Apparent Young's Modulus Calculation, Hertz Model, sphere
         """
-        indentation = abs(self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1])
-        force = np.power(self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1], 3)
+        indentation = np.power(abs(self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1]), 3)
+        force = np.power(self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1], 2)
         try:
-            z = np.polyfit(indentation, force, 2)
+            z = np.polyfit(indentation, force, 1)
         except TypeError:
             z = [0, 0]
-        self.young_mod_hertz = (3./4) * z[0] * (1-poisson_ration**2) * (1/np.sqrt(tip_radius))
+        self.young_mod_hertz = (9./16) * np.sqrt(z[0] * (1-poisson_ratio**2)) * (1/np.sqrt(tip_radius))
 
-    def calculate_apparent_young_modulus_sneddon(self):
+    def calculate_apparent_young_modulus_sneddon(self, poisson_ratio = 0.5, angle=20):
         """
         Apparent Young's Modulus Calculation, Sneddon Model, cone
         """
         # see hertz sneddon stuff
-        indentation = self.smoothedMeasHeight[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1]
-        force = self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1]
-        pass
+        indentation = np.power(abs(self.smoothedMeasHeight[0:self.extend_length - 1][
+                                   len(self.smoothedMeasHeight) - self.contact_point_index:-1]), 2)
+        force = np.power(
+            self.vDeflection[0:self.extend_length - 1][len(self.vDeflection) - self.contact_point_index:-1], 1)
+        try:
+            z = np.polyfit(indentation, force, 1)
+        except TypeError:
+            z = [0, 0]
+        self.young_mod_sneddon = (((np.pi / 2.) * (1-poisson_ratio**2)) / (np.tan(angle))) * z[0]
 
     def plot_curve(self):
         """
         Plots a force curve of smoothed measured height vs. cantilever deflection
         """
-        plt.plot(self.vDeflection)
+        plt.plot(self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1],
+                 self.vDeflection[0:self.extend_length-1][len(self.vDeflection) - self.contact_point_index:-1])
+
+        def cubic(ind, z):
+            return [z[0]*i**3 + z[1]*i**2 + z[2]*i + z[3] for i in ind]
+
+        indentation = self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1]
+        force = cubic(indentation, self.stiff_params)
+
+        plt.plot(self.smoothedMeasHeight[0:self.extend_length-1][len(self.smoothedMeasHeight) - self.contact_point_index:-1],
+                 force)
         plt.show()
 
     def __repr__(self):
-        return "I am a force curve at x = %f, y = %s \n \
-        My contact point is at %f metres \n \
-        My apparent stiffness is %f N/m \n \
-        My Hertz modulus is %f Pascals" % (self.x_pos,
-                                           self.y_pos,
+        return """I am a force curve at x = %f, y = %s
+        My contact point is at %f metres
+        My apparent stiffness is %f N/m
+        My Hertz modulus is %f MPa
+        My Sneddon modulus is %f MPa""" % (self.x_pos,self.y_pos,
                                            self.contactpoint,
                                            self.instantaneous_stiffness,
-                                           self.young_mod_hertz)
+                                           self.young_mod_hertz/1e6,
+                                           self.young_mod_sneddon/1e6)
 
 
 class ForceMap(object):
@@ -138,6 +162,19 @@ class ForceMap(object):
             key = curve_file[-9:-4]
             value = ForceCurve(os.path.join(directory, curve_file))
             self.force_curve_dictionary[key] = value
+
+        x, y = [], []
+        for curve in self.force_curve_dictionary.itervalues():
+            x.append(curve.x_pos)
+            y.append(curve.y_pos)
+
+        self.x_spacing = (max(x) - min(x))/len(x)
+        self.y_spacing = (max(y) - min(y))/len(y)
+        self.x_dim = len(set(x))
+        self.y_dim = len(set(y))
+
+        print self.x_spacing, self. y_spacing
+        print self.x_dim, self.y_dim
 
     def plot_height_map(self):
         """
@@ -168,10 +205,11 @@ class ForceMap(object):
         """
         print "Plotting Stiffness Map..."
         x, y, apparent_stiffness = list(), list(), list()
-        for curve in self.force_curve_dictionary.itervalues():
-            x.append(curve.x_pos)
-            y.append(curve.y_pos)
-            apparent_stiffness.append(curve.instantaneous_stiffness)
+        for key, curve in self.force_curve_dictionary.iteritems():
+            if curve.instantaneous_stiffness < 2:
+                x.append(curve.x_pos)
+                y.append(curve.y_pos)
+                apparent_stiffness.append(curve.instantaneous_stiffness)
 
         fig = plt.figure()
         ax = fig.gca()
@@ -180,6 +218,29 @@ class ForceMap(object):
                    cmap='bone',
                    vmin=min(apparent_stiffness),
                    vmax=max(apparent_stiffness))
+        plt.axis('equal')
+        plt.xlim([min(x), max(x)])
+        plt.ylim([min(y), max(y)])
+        plt.show()
+
+    def plot_sneddon_map(self):
+        """
+        plots a force map of instantaneous stiffness
+        """
+        print "Plotting Sneddon Map..."
+        x, y, sneddon = list(), list(), list()
+        for key, curve in self.force_curve_dictionary.iteritems():
+            x.append(curve.x_pos)
+            y.append(curve.y_pos)
+            sneddon.append(curve.young_mod_sneddon)
+
+        fig = plt.figure()
+        ax = fig.gca()
+        ax.scatter(x, y,
+                   c=sneddon,
+                   cmap='bone',
+                   vmin=min(sneddon),
+                   vmax=max(sneddon))
         plt.axis('equal')
         plt.xlim([min(x), max(x)])
         plt.ylim([min(y), max(y)])
@@ -208,6 +269,15 @@ class ForceMap(object):
         plt.ylim([min(y), max(y)])
         plt.show()
 
+    def plot_stiffness_hist(self):
+        """ plot a histogram of the stiffness values"""
+        stiff_list = []
+        for curve in self.force_curve_dictionary.itervalues():
+            if curve.instantaneous_stiffness < 2:
+                stiff_list.append(curve.instantaneous_stiffness)
+
+        plt.hist(stiff_list, 50)
+        plt.show()
 
 def main():
     # path = "./example_data/Le Mannitol 010316 sample 1 map-data-2016.03.01-15.09.41.098_00013.txt"
@@ -215,8 +285,11 @@ def main():
     # point1 = ForceCurve(path2)
     # point1.plot_curve()
     directory = "/Users/carterr/Documents/afm_andy/LE Mannitol 010316 Sample 1/Le Mannitol 010316 sample 1 map-data-2016.03.01-15.09.41.098_processed-2016.03.02-10.20.03"
-    map1 = ForceMap(directory)
+    directory2 = "/Users/carterr/Documents/afm_andy/LE Mannitol 030216 S3/map LE mannitol 030216 S3-data-2016.02.03-12.39.34.049_processed-2016.02.04-09.09.59"
+    map1 = ForceMap(directory2)
     map1.plot_height_map()
+    #map1.plot_stiffness_map()
+    #map1.plot_hertz_map()
 
 
 if __name__ == '__main__':
